@@ -1,0 +1,28 @@
+frontend
+
+auth.js:18 
+ POST http://localhost:3001/daily 500 (Internal Server Error)
+api	@	auth.js:18
+handleSubmit	@	Dashboard.svelte:93
+(anonymous)	@	chunk-2DVRIXOC.js?v=5ca994c0:742
+(anonymous)	@	chunk-FHRBKB34.js?v=5ca994c0:4350
+without_reactive_context	@	chunk-FHRBKB34.js?v=5ca994c0:2795
+target_handler	@	chunk-FHRBKB34.js?v=5ca994c0:4349
+
+backend
+
+backend-1   | [Nest] 18  - 02/21/2026, 3:51:11 AM   ERROR [ExceptionsHandler] UpdateValuesMissingError: Cannot perform update query because update values are not defined. Call "qb.set(...)" method to specify updated values.
+backend-1   |     at UpdateQueryBuilder.createUpdateExpression (/app/node_modules/typeorm/query-builder/UpdateQueryBuilder.js:430:19)
+backend-1   |     at UpdateQueryBuilder.getQuery (/app/node_modules/typeorm/query-builder/UpdateQueryBuilder.js:34:21)
+backend-1   |     at UpdateQueryBuilder.getQueryAndParameters (/app/node_modules/typeorm/query-builder/QueryBuilder.js:262:28)
+backend-1   |     at UpdateQueryBuilder.execute (/app/node_modules/typeorm/query-builder/UpdateQueryBuilder.js:81:50)
+backend-1   |     at updateSubject (/app/node_modules/typeorm/persistence/SubjectExecutor.js:380:63)
+backend-1   |     at Array.map (<anonymous>)
+backend-1   |     at SubjectExecutor.executeUpdateOperations (/app/node_modules/typeorm/persistence/SubjectExecutor.js:417:34)
+backend-1   |     at SubjectExecutor.execute (/app/node_modules/typeorm/persistence/SubjectExecutor.js:99:20)
+backend-1   |     at async EntityPersistExecutor.execute (/app/node_modules/typeorm/persistence/EntityPersistExecutor.js:140:21)
+backend-1   |     at async /app/node_modules/@nestjs/core/router/router-execution-context.js:46:28
+
+
+
+
