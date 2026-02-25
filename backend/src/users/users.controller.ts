@@ -15,6 +15,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { User, UserRole } from './entities/user.entity';
 
 @ApiTags('Users')
@@ -28,6 +29,13 @@ export class UsersController {
   @ApiOperation({ summary: 'Create a new user' })
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
+  }
+
+  @Post('change-password')
+  @ApiOperation({ summary: 'Change your password' })
+  changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
+    const user = req.user as User;
+    return this.usersService.changePassword(user.id, changePasswordDto);
   }
 
   @Get()

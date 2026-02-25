@@ -1,41 +1,51 @@
 <script>
-  import { onMount } from 'svelte';
-  import { api, removeToken, getToken } from './auth';
+  import { onMount } from "svelte";
+  import { api, removeToken, getToken } from "./auth";
 
   let currentUser = null;
   let reports = [];
   let users = [];
   let projects = [];
-  let newReportContent = '';
-  let selectedProject = '';
+  let newReportContent = "";
+  let selectedProject = "";
   let loading = true;
   let creating = false;
-  let activeTab = 'reports';
+  let activeTab = "reports";
+
+  // Settings
+  let newPassword = "";
+  let changingPassword = false;
 
   // New user form
   let showUserForm = false;
-  let newUser = { username: '', password: '', role: 'employee', rank: 'junior', managerId: null };
+  let newUser = {
+    username: "",
+    password: "",
+    role: "employee",
+    rank: "junior",
+    managerId: null,
+  };
   let creatingUser = false;
 
   // New project form
   let showProjectForm = false;
-  let newProject = { name: '', description: '', leaderId: null };
+  let newProject = { name: "", description: "", leaderId: null };
   let creatingProject = false;
 
   // Filters
   let filters = {
-    userId: '',
-    projectId: '',
-    startDate: '',
-    endDate: '',
-    search: ''
+    userId: "",
+    projectId: "",
+    startDate: "",
+    endDate: "",
+    search: "",
   };
 
   onMount(async () => {
     const token = getToken();
     if (token) {
       try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
+        const payload = JSON.parse(atob(token.split(".")[1]));
         currentUser = payload;
       } catch (e) {
         console.error(e);
@@ -43,7 +53,7 @@
     }
     await fetchReports();
     await fetchProjects();
-    if (currentUser?.role === 'admin') {
+    if (currentUser?.role === "admin") {
       await fetchUsers();
     }
   });
@@ -52,14 +62,14 @@
     loading = true;
     try {
       const params = new URLSearchParams();
-      if (filters.userId) params.append('userId', filters.userId);
-      if (filters.projectId) params.append('projectId', filters.projectId);
-      if (filters.startDate) params.append('startDate', filters.startDate);
-      if (filters.endDate) params.append('endDate', filters.endDate);
-      if (filters.search) params.append('search', filters.search);
-      
+      if (filters.userId) params.append("userId", filters.userId);
+      if (filters.projectId) params.append("projectId", filters.projectId);
+      if (filters.startDate) params.append("startDate", filters.startDate);
+      if (filters.endDate) params.append("endDate", filters.endDate);
+      if (filters.search) params.append("search", filters.search);
+
       const query = params.toString();
-      reports = await api(`/daily${query ? '?' + query : ''}`);
+      reports = await api(`/daily${query ? "?" + query : ""}`);
     } catch (e) {
       console.error(e);
     } finally {
@@ -69,7 +79,7 @@
 
   async function fetchUsers() {
     try {
-      users = await api('/users');
+      users = await api("/users");
     } catch (e) {
       console.error(e);
     }
@@ -77,7 +87,7 @@
 
   async function fetchProjects() {
     try {
-      projects = await api('/projects');
+      projects = await api("/projects");
     } catch (e) {
       console.error(e);
     }
@@ -89,13 +99,13 @@
     try {
       const data = { content: newReportContent };
       if (selectedProject) data.projectId = parseInt(selectedProject);
-      
-      await api('/daily', {
-        method: 'POST',
+
+      await api("/daily", {
+        method: "POST",
         body: JSON.stringify(data),
       });
-      newReportContent = '';
-      selectedProject = '';
+      newReportContent = "";
+      selectedProject = "";
       await fetchReports();
     } catch (e) {
       alert(e.message);
@@ -106,19 +116,25 @@
 
   async function handleCreateUser() {
     if (!newUser.username || !newUser.password) {
-      alert('Username and password are required');
+      alert("Username and password are required");
       return;
     }
     creatingUser = true;
     try {
-      await api('/users', {
-        method: 'POST',
+      await api("/users", {
+        method: "POST",
         body: JSON.stringify(newUser),
       });
       showUserForm = false;
-      newUser = { username: '', password: '', role: 'employee', rank: 'junior', managerId: null };
+      newUser = {
+        username: "",
+        password: "",
+        role: "employee",
+        rank: "junior",
+        managerId: null,
+      };
       await fetchUsers();
-      alert('User created successfully');
+      alert("User created successfully");
     } catch (e) {
       alert(e.message);
     } finally {
@@ -128,19 +144,19 @@
 
   async function handleCreateProject() {
     if (!newProject.name) {
-      alert('Project name is required');
+      alert("Project name is required");
       return;
     }
     creatingProject = true;
     try {
-      await api('/projects', {
-        method: 'POST',
+      await api("/projects", {
+        method: "POST",
         body: JSON.stringify(newProject),
       });
       showProjectForm = false;
-      newProject = { name: '', description: '', leaderId: null };
+      newProject = { name: "", description: "", leaderId: null };
       await fetchProjects();
-      alert('Project created successfully');
+      alert("Project created successfully");
     } catch (e) {
       alert(e.message);
     } finally {
@@ -149,22 +165,22 @@
   }
 
   async function handleDeleteUser(id) {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm("Are you sure you want to delete this user?")) return;
     try {
-      await api(`/users/${id}`, { method: 'DELETE' });
+      await api(`/users/${id}`, { method: "DELETE" });
       await fetchUsers();
-      alert('User deleted');
+      alert("User deleted");
     } catch (e) {
       alert(e.message);
     }
   }
 
   async function handleDeleteProject(id) {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    if (!confirm("Are you sure you want to delete this project?")) return;
     try {
-      await api(`/projects/${id}`, { method: 'DELETE' });
+      await api(`/projects/${id}`, { method: "DELETE" });
       await fetchProjects();
-      alert('Project deleted');
+      alert("Project deleted");
     } catch (e) {
       alert(e.message);
     }
@@ -172,7 +188,27 @@
 
   function handleLogout() {
     removeToken();
-    window.location.hash = '/login';
+    window.location.hash = "/login";
+  }
+
+  async function handleChangePassword() {
+    if (newPassword.length < 6) {
+      alert("Password must be at least 6 characters long");
+      return;
+    }
+    changingPassword = true;
+    try {
+      await api("/users/change-password", {
+        method: "POST",
+        body: JSON.stringify({ newPassword }),
+      });
+      alert("Password updated successfully");
+      newPassword = "";
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      changingPassword = false;
+    }
   }
 
   function applyFilters() {
@@ -180,17 +216,33 @@
   }
 
   function clearFilters() {
-    filters = { userId: '', projectId: '', startDate: '', endDate: '', search: '' };
+    filters = {
+      userId: "",
+      projectId: "",
+      startDate: "",
+      endDate: "",
+      search: "",
+    };
     fetchReports();
   }
 
   function getRoleLabel(role) {
-    const labels = { admin: 'Admin', team_leader: 'Team Leader', employee: 'Employee' };
+    const labels = {
+      admin: "Admin",
+      team_leader: "Team Leader",
+      employee: "Employee",
+    };
     return labels[role] || role;
   }
 
   function getRankLabel(rank) {
-    const labels = { junior: 'Junior', middle: 'Middle', senior: 'Senior', lead: 'Lead', manager: 'Manager' };
+    const labels = {
+      junior: "Junior",
+      middle: "Middle",
+      senior: "Senior",
+      lead: "Lead",
+      manager: "Manager",
+    };
     return labels[rank] || rank;
   }
 </script>
@@ -201,22 +253,37 @@
       <h1>Daily Reports</h1>
       {#if currentUser}
         <span class="user-info">
-          {currentUser.username} ({getRoleLabel(currentUser.role)} - {getRankLabel(currentUser.rank || 'junior')})
+          {currentUser.username} ({getRoleLabel(currentUser.role)} - {getRankLabel(
+            currentUser.rank || "junior",
+          )})
         </span>
       {/if}
     </div>
     <button class="logout-btn" on:click={handleLogout}>Logout</button>
   </header>
 
-  {#if currentUser?.role === 'admin'}
-    <nav class="tabs">
-      <button class:active={activeTab === 'reports'} on:click={() => activeTab = 'reports'}>Reports</button>
-      <button class:active={activeTab === 'users'} on:click={() => activeTab = 'users'}>Users</button>
-      <button class:active={activeTab === 'projects'} on:click={() => activeTab = 'projects'}>Projects</button>
-    </nav>
-  {/if}
+  <nav class="tabs">
+    <button
+      class:active={activeTab === "reports"}
+      on:click={() => (activeTab = "reports")}>Reports</button
+    >
+    {#if currentUser?.role === "admin"}
+      <button
+        class:active={activeTab === "users"}
+        on:click={() => (activeTab = "users")}>Users</button
+      >
+      <button
+        class:active={activeTab === "projects"}
+        on:click={() => (activeTab = "projects")}>Projects</button
+      >
+    {/if}
+    <button
+      class:active={activeTab === "settings"}
+      on:click={() => (activeTab = "settings")}>Settings</button
+    >
+  </nav>
 
-  {#if activeTab === 'reports'}
+  {#if activeTab === "reports"}
     <div class="card create-section">
       <h3>New Daily Report</h3>
       <form on:submit|preventDefault={handleSubmit}>
@@ -236,7 +303,7 @@
         ></textarea>
         <div style="text-align: right;">
           <button type="submit" disabled={creating}>
-            {creating ? 'Submitting...' : 'Submit Report'}
+            {creating ? "Submitting..." : "Submit Report"}
           </button>
         </div>
       </form>
@@ -247,7 +314,11 @@
       <div class="filter-grid">
         <div class="filter-group">
           <label>Search</label>
-          <input type="text" bind:value={filters.search} placeholder="Search in content..." />
+          <input
+            type="text"
+            bind:value={filters.search}
+            placeholder="Search in content..."
+          />
         </div>
         <div class="filter-group">
           <label>User</label>
@@ -296,8 +367,8 @@
                 <span class="date"
                   >{new Date(report.date).toLocaleDateString()}
                   {new Date(report.date).toLocaleTimeString([], {
-                    hour: '2-digit',
-                    minute: '2-digit',
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })}</span
                 >
                 {#if report.project}
@@ -309,26 +380,37 @@
                   <span class="user-badge">{report.user.username}</span>
                 {/if}
                 {#if report.user?.rank}
-                  <span class="rank-badge">{getRankLabel(report.user.rank)}</span>
+                  <span class="rank-badge"
+                    >{getRankLabel(report.user.rank)}</span
+                  >
                 {/if}
               </div>
               <div class="report-content">
-                {report.content.substring(0, 100)}{report.content.length > 100 ? '...' : ''}
+                {report.content.substring(0, 100)}{report.content.length > 100
+                  ? "..."
+                  : ""}
               </div>
-              <div class="report-actions" style="margin-top: 10px; text-align: right;">
-                <a href="#/reports/{report.id}" style="color: #646cff; text-decoration: none; font-size: 0.9rem;">View Full Report &rarr;</a>
+              <div
+                class="report-actions"
+                style="margin-top: 10px; text-align: right;"
+              >
+                <a
+                  href="#/reports/{report.id}"
+                  style="color: #646cff; text-decoration: none; font-size: 0.9rem;"
+                  >View Full Report &rarr;</a
+                >
               </div>
             </div>
           {/each}
         </div>
       {/if}
     </div>
-  {:else if activeTab === 'users'}
+  {:else if activeTab === "users"}
     <div class="card">
       <div class="section-header">
         <h3>User Management</h3>
-        <button on:click={() => showUserForm = !showUserForm}>
-          {showUserForm ? 'Cancel' : '+ New User'}
+        <button on:click={() => (showUserForm = !showUserForm)}>
+          {showUserForm ? "Cancel" : "+ New User"}
         </button>
       </div>
 
@@ -367,15 +449,17 @@
               <label>Manager</label>
               <select bind:value={newUser.managerId}>
                 <option value={null}>No Manager</option>
-                {#each users.filter(u => u.role !== 'employee') as user}
-                  <option value={user.id}>{user.username} ({getRoleLabel(user.role)})</option>
+                {#each users.filter((u) => u.role !== "employee") as user}
+                  <option value={user.id}
+                    >{user.username} ({getRoleLabel(user.role)})</option
+                  >
                 {/each}
               </select>
             </div>
           </div>
           <div class="form-actions">
             <button type="submit" disabled={creatingUser}>
-              {creatingUser ? 'Creating...' : 'Create User'}
+              {creatingUser ? "Creating..." : "Create User"}
             </button>
           </div>
         </form>
@@ -397,12 +481,23 @@
             <tr>
               <td>{user.id}</td>
               <td>{user.username}</td>
-              <td><span class="role-badge {user.role}">{getRoleLabel(user.role)}</span></td>
-              <td><span class="rank-badge {user.rank}">{getRankLabel(user.rank || 'junior')}</span></td>
-              <td>{user.manager?.username || '-'}</td>
+              <td
+                ><span class="role-badge {user.role}"
+                  >{getRoleLabel(user.role)}</span
+                ></td
+              >
+              <td
+                ><span class="rank-badge {user.rank}"
+                  >{getRankLabel(user.rank || "junior")}</span
+                ></td
+              >
+              <td>{user.manager?.username || "-"}</td>
               <td>
                 {#if user.id !== currentUser?.id}
-                  <button class="danger" on:click={() => handleDeleteUser(user.id)}>Delete</button>
+                  <button
+                    class="danger"
+                    on:click={() => handleDeleteUser(user.id)}>Delete</button
+                  >
                 {/if}
               </td>
             </tr>
@@ -410,12 +505,12 @@
         </tbody>
       </table>
     </div>
-  {:else if activeTab === 'projects'}
+  {:else if activeTab === "projects"}
     <div class="card">
       <div class="section-header">
         <h3>Project Management</h3>
-        <button on:click={() => showProjectForm = !showProjectForm}>
-          {showProjectForm ? 'Cancel' : '+ New Project'}
+        <button on:click={() => (showProjectForm = !showProjectForm)}>
+          {showProjectForm ? "Cancel" : "+ New Project"}
         </button>
       </div>
 
@@ -444,7 +539,7 @@
           </div>
           <div class="form-actions">
             <button type="submit" disabled={creatingProject}>
-              {creatingProject ? 'Creating...' : 'Create Project'}
+              {creatingProject ? "Creating..." : "Create Project"}
             </button>
           </div>
         </form>
@@ -466,16 +561,48 @@
             <tr>
               <td>{project.id}</td>
               <td>{project.name}</td>
-              <td>{project.description || '-'}</td>
-              <td>{project.leader?.username || '-'}</td>
+              <td>{project.description || "-"}</td>
+              <td>{project.leader?.username || "-"}</td>
               <td>{new Date(project.createdAt).toLocaleDateString()}</td>
               <td>
-                <button class="danger" on:click={() => handleDeleteProject(project.id)}>Delete</button>
+                <button
+                  class="danger"
+                  on:click={() => handleDeleteProject(project.id)}
+                  >Delete</button
+                >
               </td>
             </tr>
           {/each}
         </tbody>
       </table>
+    </div>
+  {:else if activeTab === "settings"}
+    <div class="card">
+      <div class="section-header">
+        <h3>User Settings</h3>
+      </div>
+
+      <form
+        class="user-form"
+        style="max-width: 400px;"
+        on:submit|preventDefault={handleChangePassword}
+      >
+        <div class="form-group">
+          <label>New Password</label>
+          <input
+            type="password"
+            bind:value={newPassword}
+            placeholder="Enter new password (min. 6 characters)"
+            required
+            minlength="6"
+          />
+        </div>
+        <div class="form-actions" style="text-align: left;">
+          <button type="submit" disabled={changingPassword}>
+            {changingPassword ? "Updating..." : "Change Password"}
+          </button>
+        </div>
+      </form>
     </div>
   {/if}
 </div>
@@ -483,7 +610,8 @@
 <style>
   :global(body) {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      sans-serif;
     background: #1a1a1a;
   }
 
@@ -552,7 +680,7 @@
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     border: 1px solid #333;
   }
 
@@ -697,7 +825,8 @@
     font-size: 0.75rem;
   }
 
-  .rank-badge.senior, .rank-badge.lead {
+  .rank-badge.senior,
+  .rank-badge.lead {
     background: rgba(76, 175, 80, 0.2);
     color: #6fbf65;
   }
@@ -784,7 +913,11 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 </style>
