@@ -1,4 +1,4 @@
-export const API_URL = 'http://localhost:3001'; // Make sure this matches your backend port
+export const API_URL = `http://${window.location.hostname}:3001`;
 
 export const getToken = () => localStorage.getItem('access_token');
 export const setToken = (token) => localStorage.setItem('access_token', token);
